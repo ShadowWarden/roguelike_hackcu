@@ -17,8 +17,8 @@ import itertools
 
 XLIM = 600
 YLIM = 600
-NTILES = 15
-dTILE = 40
+NTILES = 10
+dTILE = 60
 
 Map = np.zeros([NTILES,NTILES])
 
@@ -26,7 +26,8 @@ Map[0,:] += 1
 Map[-1,:] += 1
 Map[1:-1,0] += 1
 Map[1:-1,-1] += 1
-Map[10,10] += 2
+Map[5,5] += 2
+Map[8,8] += 3
 
 print(Map)
 
@@ -54,6 +55,9 @@ def main():
     floor_tile = pygame.transform.scale(floor_tile,(dTILE,dTILE))
     charac_tile = pygame.image.load("../artlib/charac.png")
     charac_tile = pygame.transform.scale(charac_tile,(dTILE,dTILE))
+    orc_tile = pygame.image.load("../artlib/orc.png")
+    orc_tile = pygame.transform.scale(orc_tile,(dTILE,dTILE))
+
 
     def tile_background():
         for x,y in itertools.product(range(0,XLIM,dTILE),range(0,YLIM,dTILE)):
@@ -67,8 +71,13 @@ def main():
         ii = np.where(Map == 2)
         screen.blit(charac_tile,(dTILE*ii[0],dTILE*ii[1]))
     
-    screen.blit(background,(0,0))
+    def place_npc():
+        ii = np.where(Map == 3)
+        screen.blit(orc_tile,(dTILE*ii[0],dTILE*ii[1]))
 
+    screen.blit(background,(0,0))
+    
+    moveres = 1
     moved = 1
     angle = 90
     while 1:
@@ -87,7 +96,7 @@ def main():
                     angle = 180
                     moved = 1
                 elif event.key == pygame.K_UP:
-                    move.Move(Map,0) 
+                    moveres = move.Move(Map,0) 
                     dtheta = 270-angle
                     charac_tile = pygame.transform.rotate(charac_tile,dtheta)
                     angle = 270
@@ -103,6 +112,9 @@ def main():
         if(moved == 1):
             tile_background()
             place_char()
+            place_npc()
+            if(moveres == 0): 
+                text.showtext(background,"There's a wall there!",XLIM/2,YLIM/2,50,[10,0,0])  
             pygame.display.flip()
             moved = 0
  
