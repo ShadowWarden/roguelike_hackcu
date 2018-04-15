@@ -10,10 +10,14 @@ import pygame
 from pygame.locals import *
 import os
 import numpy as np
+import json
 import image
 import text
 import move
 import itertools
+
+import client
+import state as S
 
 XLIM = 600
 YLIM = 600
@@ -21,6 +25,7 @@ NTILES = 10
 dTILE = 60
 
 Map = np.zeros([NTILES,NTILES])
+
 
 Map[0,:] += 1
 Map[-1,:] += 1
@@ -38,6 +43,7 @@ def main():
     pygame.font.init()
     screen = pygame.display.set_mode((XLIM,YLIM))
     pygame.display.set_caption("Basic Pygame game")
+    myfont = pygame.font.SysFont('Comic Sans MS', 40)
 
     # Fill background
     background = pygame.Surface(screen.get_size())
@@ -76,11 +82,20 @@ def main():
         screen.blit(orc_tile,(dTILE*ii[0],dTILE*ii[1]))
 
     screen.blit(background,(0,0))
-    
+
+    res1 = client.create_state(0)
+
     moveres = 1
     moved = 1
     angle = 90
+    Res = client.check(res1)
+    print(Res)
+    offset = 0
     while 1:
+        time = pygame.time.get_ticks()
+        if(time +offset*1000> 5000):
+            Res = client.check(res1)
+            offset -= 5
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
@@ -107,6 +122,8 @@ def main():
                     charac_tile = pygame.transform.rotate(charac_tile,dtheta)
                     angle = 90
                     moved = 1 
+                elif event.key == pygame.K_k:
+                    res1 = client.create_fake_state(0)
             if event.type == QUIT:
                 return
         if(moved == 1):
@@ -115,6 +132,9 @@ def main():
             place_npc()
             if(moveres == 0): 
                 text.showtext(background,"There's a wall there!",XLIM/2,YLIM/2,50,[10,0,0])  
+            if(Res['index'] == -2):
+                label = myfont.render("You cheat... -_-",1,(255,255,0))
+                screen.blit(label,((XLIM-30)/2,YLIM/2))
             pygame.display.flip()
             moved = 0
  
